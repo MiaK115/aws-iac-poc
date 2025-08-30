@@ -1,0 +1,4 @@
+db_password = "MyPassword1!"
+project_name = "retail-poc"
+region       = "eu-west-1"
+enable_waf   = true             
