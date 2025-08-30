@@ -38,10 +38,10 @@ jobs:
       - name: Terraform Validate
         run: terraform validate
 
-      # Safe plan: no changes applied, just refreshes remote state if available.
       - name: Terraform Plan (refresh-only)
         run: terraform plan -refresh-only -lock=false -input=false || echo "No state to refresh (expected in CI)."
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
