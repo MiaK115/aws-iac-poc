@@ -7,6 +7,7 @@ on:
   pull_request:
     paths:
       - 'terraform/**'
+  workflow_dispatch:
 
 jobs:
   terraform:
@@ -24,21 +25,22 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform Init (Remote State)
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init (remote state)
         run: terraform init -backend-config=backend.hcl -input=false
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform fmt
-        run: terraform fmt -check -recursive
-
-      - name: Terraform validate
+      - name: Terraform Validate
         run: terraform validate
 
-      - name: Terraform Plan (Refresh Only)
-        run: terraform plan -refresh-only -lock=false -input=false || echo "No state to refresh (expected in CI)"
+      # Safe plan: no changes applied, just refreshes remote state if available.
+      - name: Terraform Plan (refresh-only)
+        run: terraform plan -refresh-only -lock=false -input=false || echo "No state to refresh (expected in CI)."
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
