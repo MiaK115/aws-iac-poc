@@ -2,7 +2,7 @@ CA 1 IT Infrastructure & Automation
 
 This repo contains a Terraform proof-of-concept that stands up a small, production-like web stack on AWS
 
-What this repo build:
+What this repo builds:
 
 - 1 x VPC with 2 public + 2 private subnets across 2 AZs
 - Internet Gateway and a single NAT Gateway (to keep costs down)
