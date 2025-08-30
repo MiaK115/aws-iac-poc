@@ -307,17 +307,16 @@ resource "aws_launch_template" "app" {
   instance_type = var.instance_type
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_profile.name
-
-  metadata_options {
-    http_endpoint = "enabled"   # ensure metadata service is on
-    http_tokens   = "optional"  # allow IMDSv1
-    # http_put_response_hop_limit = 1  
-  }
   }
   # Using templatefile to inject the RDS endpoint into user-data at deploy time
   user_data = base64encode(templatefile("${path.module}/userdata.sh", {
     db_endpoint = aws_db_instance.this.address
   }))
+
+  metadata_options {
+    http_endpoint = "enabled"
+    http_tokens   = "optional"  # allows IMDSv1 for your current script
+  }
 
   network_interfaces {
     security_groups             = [aws_security_group.ec2_sg.id]
