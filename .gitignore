@@ -4,5 +4,4 @@
 .crc
 .terraform.lock.hcl
 terraform.tfvars
-backend.hcl
 .DS_Store
