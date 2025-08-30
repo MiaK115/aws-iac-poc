@@ -315,7 +315,7 @@ resource "aws_launch_template" "app" {
 
   metadata_options {
     http_endpoint = "enabled"
-    http_tokens   = "optional"  # allows IMDSv1 for your current script
+    http_tokens   = "optional" # allows IMDSv1 for your current script
   }
 
   network_interfaces {
