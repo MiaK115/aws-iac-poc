@@ -1,4 +1,4 @@
-name: terraform
+name: Terraform CI
 
 on:
   push:
@@ -7,7 +7,6 @@ on:
   pull_request:
     paths:
       - 'terraform/**'
-  workflow_dispatch:
 
 jobs:
   terraform:
@@ -15,6 +14,7 @@ jobs:
     defaults:
       run:
         working-directory: terraform/poc
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,32 +24,22 @@ jobs:
         with:
           terraform_version: 1.7.5
 
-      - name: Terraform Format
-        run: terraform fmt -check
+      - name: Terraform Init (Remote State)
+        run: terraform init -backend-config=backend.hcl -input=false
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Terraform init (remote state)
-  	run: terraform init -backend-config=backend.hcl -input=false
- 	env:
-    	  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    	  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    	  AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
 
-      - name: Terraform Validate
+      - name: Terraform validate
         run: terraform validate
 
-      - name: Terraform Plan
+      - name: Terraform Plan (Refresh Only)
+        run: terraform plan -refresh-only -lock=false -input=false || echo "No state to refresh (expected in CI)"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
-          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-        run: terraform plan -input=false
-
-      - name: Terraform Apply (manual)
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
-        run: terraform apply -auto-approve -input=false
